@@ -1,4 +1,4 @@
-const API_BASE_URL = "http://localhost:5000/api/sensors"; // Backend API base URL
+const API_BASE_URL = "https://esp-32-project-backend.vercel.app/api/sensors"; // Backend API base URL
 // const BLYNK_STATUS_URL = "https://blynk.cloud/external/api/get?token=7L6qI3gaecxIK6wMAvNytsvvLya9NyG8&V0"; // Blynk API for system status
 
 let tempHumidityChart;
@@ -17,7 +17,7 @@ function logout() {
 
 async function fetchNotifications() {
     try {
-        const response = await fetch("http://localhost:5000/api/sensors/notifications");
+        const response = await fetch("https://esp-32-project-backend.vercel.app/api/sensors/notifications");
         if (!response.ok) {
             throw new Error(`Server responded with status ${response.status}`);
         }
@@ -41,7 +41,7 @@ async function fetchNotifications() {
 
 async function clearNotifications() {
     try {
-        const response = await fetch("http://localhost:5000/api/sensors/clear-notifications", { method: "DELETE" });
+        const response = await fetch("https://esp-32-project-backend.vercel.app/api/sensors/clear-notifications", { method: "DELETE" });
         if (!response.ok) {
             throw new Error(`Server responded with status ${response.status}`);
         }
@@ -99,7 +99,7 @@ async function fetchSystemStatus() {
         }
 
         // Send system status to backend
-        await fetch("http://localhost:5000/api/sensors/update-status", {
+        await fetch("https://esp-32-project-backend.vercel.app/api/sensors/update-status", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ status: systemStatus })
@@ -116,7 +116,7 @@ async function fetchSystemStatus() {
 // Fetch sensor data from backend every 3 seconds
 async function fetchSensorData() {
     try {
-        const response = await fetch("http://localhost:5000/api/sensors/data");
+        const response = await fetch("https://esp-32-project-backend.vercel.app/api/sensors/data");
         if (!response.ok) {
             throw new Error(`Server responded with status ${response.status}`);
         }
