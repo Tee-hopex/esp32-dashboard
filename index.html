@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signup & Login</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="form-container" id="signup">
+            <h2>Sign Up</h2>
+            <form id="signupForm">
+                <input type="text" id="signupFullName" placeholder="Full Name" required>
+                <input type="email" id="signupEmail" placeholder="Email" required>
+                <input type="password" id="signupPassword" placeholder="Password" required>
+                <button type="submit">Register</button>
+                <p>Already have an account? <a href="#" onclick="toggleForms()">Login</a></p>
+            </form>
+        </div>
+
+        <div class="form-container" id="login" style="display: none;">
+            <h2>Login</h2>
+            <form id="loginForm">
+                <input type="email" id="loginEmail" placeholder="Email" required>
+                <input type="password" id="loginPassword" placeholder="Password" required>
+                <button type="submit">Login</button>
+                <p>Don't have an account? <a href="#" onclick="toggleForms()">Sign Up</a></p>
+            </form>
+        </div>
+        <p id="authMessage" style="color: red; display: none;"></p>
+    </div>
+
+    <script>
+        function toggleForms() {
+            document.getElementById('signup').style.display = 
+                document.getElementById('signup').style.display === 'none' ? 'block' : 'none';
+            document.getElementById('login').style.display = 
+                document.getElementById('login').style.display === 'none' ? 'block' : 'none';
+        }
+
+        // Signup Function
+        document.getElementById("signupForm").addEventListener("submit", async function (e) {
+            e.preventDefault();
+            const fullName = document.getElementById("signupFullName").value;
+            const email = document.getElementById("signupEmail").value;
+            const password = document.getElementById("signupPassword").value;
+
+            const response = await fetch("http://localhost:5000/api/auth/signup", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ fullName, email, password })
+            });
+
+            const data = await response.json();
+            if (data.message) {
+                alert("✅ Signup successful! You can now log in.");
+                toggleForms();
+            } else {
+                document.getElementById("authMessage").textContent = data.error;
+                document.getElementById("authMessage").style.display = "block";
+            }
+        });
+
+        // Login Function
+        document.getElementById("loginForm").addEventListener("submit", async function (e) {
+            e.preventDefault();
+            const email = document.getElementById("loginEmail").value;
+            const password = document.getElementById("loginPassword").value;
+
+            const response = await fetch("http://localhost:5000/api/auth/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password })
+            });
+
+            const data = await response.json();
+            if (data.token) {
+                localStorage.setItem("authToken", data.token);
+                window.location.href = "dashboard.html"; // Redirect to dashboard
+            } else {
+                document.getElementById("authMessage").textContent = data.error;
+                document.getElementById("authMessage").style.display = "block";
+            }
+        });
+    </script>
+</body>
+</html>

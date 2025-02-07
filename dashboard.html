@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <h2>Dashboard</h2>
+            <ul>
+                <li><a href="#" onclick="showPage('dashboard-page')">Home</a></li>
+                <li><a href="#" onclick="showPage('profile-page')">Profile</a></li>
+                <li><a href="#" onclick="showPage('settings-page')">Settings</a></li>
+                <li><a href="#" onclick="logout()">Logout</a></li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            <!-- Notification System -->
+            <div class="notification-container">
+                <button class="notification-icon" onclick="toggleNotifications()">
+                    🔔 Notifications (<span id="notificationCount">0</span>)
+                </button>
+                <div class="notification-dropdown">
+                    <h3>Recent Notifications</h3>
+                    <button class="clear-btn" onclick="clearNotifications()">Clear All</button>
+                    <ul id="notificationList">
+                        <li>No new notifications</li>
+                    </ul>
+                </div>
+            </div>
+            
+            
+            
+
+            <h3>System Status: <span id="systemStatus">🔄 Checking...</span></h3>
+
+            <div id="dashboard-page" class="content-page">
+                <h2>Dashboard Overview</h2>
+
+                <!-- Temperature and Humidity Readings -->
+                <div class="sensor-display">
+                    <div class="gauge-card">
+                        <h3>Temperature</h3>
+                        <div class="gauge">
+                            <div class="gauge-fill" id="tempGauge"></div>
+                            <div class="gauge-cover"><span id="tempValue">22</span>°C</div>
+                        </div>
+                    </div>
+                    <div class="gauge-card">
+                        <h3>Humidity</h3>
+                        <div class="gauge">
+                            <div class="gauge-fill" id="humidityGauge"></div>
+                            <div class="gauge-cover"><span id="humidityValue">40</span>%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chart -->
+                <div class="chart-container">
+                    <canvas id="tempHumidityChart" width="400" height="200"></canvas>
+                </div>
+
+                <!-- Widgets at the Bottom -->
+                <div class="widgets">
+                    <div class="widget recent-activity">
+                        <h3>Recent Activity</h3>
+                        <ul id="recentActivityList">
+                            <!-- Recent activity logs will appear here -->
+                        </ul>
+                    </div>
+                    <div class="widget statistics">
+                        <h3>Statistics</h3>
+                        <div class="stats-grid">
+                            <div class="stat">
+                                <span class="stat-value" id="avgTemp">0</span>
+                                <span class="stat-label">Avg Temp (°C)</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-value" id="avgHumidity">0</span>
+                                <span class="stat-label">Avg Humidity (%)</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-value" id="totalReadings">0</span>
+                                <span class="stat-label">Total Readings</span>
+                            </div>
+                            <p>Time Range: <span id="statTimeRange">Waiting for data...</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Page -->
+            <div id="profile-page" class="content-page" style="display:none;">
+                <div class="profile-container">
+                    <div class="profile-header">
+                        <div class="profile-avatar">HO</div>
+                        <div class="profile-info">
+                            <h2>Hope</h2>
+                            <p><a href="#">My organization - 4989PM</a> 🌍 Nigeria</p>
+                        </div>
+                        <div class="profile-actions">
+                            <button class="edit-button" onclick="enableEdit()">Edit Profile</button>
+                            <button id="saveProfileBtn" class="save-button" onclick="saveProfile()" style="display:none;">Save</button>
+                        </div>
+                    </div>
+                    <div class="profile-content">
+                        <div>
+                            <label>Email</label>
+                            <input type="text" class="editable" value="afolayanthopex@gmail.com" disabled>
+                        </div>
+                        <div>
+                            <label>Role</label>
+                            <input type="text" class="editable" value="Admin" disabled>
+                        </div>
+                        <div>
+                            <label>Last Login</label>
+                            <input type="text" class="editable" value="5:49 AM Today" disabled>
+                        </div>
+                        <div>
+                            <label>Registration Date</label>
+                            <input type="text" class="editable" value="11:41 AM Feb 1, 2025" disabled>
+                        </div>
+                        <div>
+                            <label>Country</label>
+                            <input type="text" class="editable" value="Nigeria" disabled>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
