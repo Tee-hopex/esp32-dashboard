@@ -1,5 +1,5 @@
 const API_BASE_URL = "https://esp-32-project-backend.vercel.app/api/sensors"; // Backend API base URL
-const BLYNK_STATUS_URL = "https://blynk.cloud/external/api/get?token=7L6qI3gaecxIK6wMAvNytsvvLya9NyG8&V0"; // Blynk API for system status
+// const BLYNK_STATUS_URL = "https://blynk.cloud/external/api/get?token=7L6qI3gaecxIK6wMAvNytsvvLya9NyG8&V0"; // Blynk API for system status
 
 let tempHumidityChart;
 let recentActivity = [];
