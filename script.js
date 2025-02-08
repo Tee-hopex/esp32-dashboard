@@ -139,16 +139,22 @@ document.getElementById("fetchToggle").addEventListener("change", async function
 
 // Fetch system status from Blynk API
 async function fetchSystemStatus() {
-    if (BLYNK_STATUS_URL === "null") {
-        console.warn("⚠ BLYNK_STATUS_URL is not set.");
+    if (!BLYNK_STATUS_URL) {
+        console.warn("⚠ BLYNK_STATUS_URL is not set. Skipping status fetch.");
         return;
     }
 
     try {
-        console.log("🌍 Fetching system status from Blynk API...");
+        console.log(`🌍 Fetching system status from: ${BLYNK_STATUS_URL}`);
 
         const response = await fetch(BLYNK_STATUS_URL);
-        const status = await response.text();
+        const status = await response.text(); // ✅ Log the raw response
+        console.log(`✅ Raw response from Blynk API:`, status);
+
+        if (!status || status.includes("<!doctype html>")) {
+            console.error("❌ Unexpected HTML response instead of JSON. Possible incorrect API URL.");
+            return;
+        }
 
         const systemStatus = status.trim().toLowerCase();
         console.log(`✅ System status received from Blynk: ${systemStatus}`);
