@@ -27,10 +27,10 @@ exports.updateSystemStatus = async (req, res) => {
     res.json({ message: "System status updated", systemOnline });
 };
 
-// exports.getSystemStatus = async (req, res) => {
-//     console.log("📡 Sending system status to backend...");
-//     res.json({ status: systemOnline ? "online" : "offline" }); // ✅ Return current system status
-// };
+exports.getSystemStatus = async (req, res) => {
+    console.log("📡 Sending system status to backend...");
+    res.json({ status: systemOnline ? "online" : "offline" }); // ✅ Return current system status
+};
 
 
 

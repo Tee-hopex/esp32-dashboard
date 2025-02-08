@@ -149,6 +149,23 @@ async function fetchSystemStatus() {
 // Fetch sensor data from backend every 3 seconds
 async function fetchSensorData() {
     try {
+        // ✅ Check system status before fetching sensor data
+        const statusResponse = await fetch(`${API_BASE_URL}/get-system-status`);
+        if (!statusResponse.ok) {
+            throw new Error(`Server responded with status ${statusResponse.status}`);
+        }
+        
+        const { status } = await statusResponse.json();
+        console.log(`🔍 System status: ${status}`);
+
+        if (status !== "online") {
+            console.warn("🚫 System is offline. Skipping sensor data fetch.");
+            return; // ✅ Stop execution if system is offline
+        }
+
+        console.log("✅ System is online. Fetching sensor data...");
+
+        // ✅ Proceed with fetching sensor data if online
         const response = await fetch(`${API_BASE_URL}/data`);
         if (!response.ok) {
             throw new Error(`Server responded with status ${response.status}`);
@@ -169,6 +186,7 @@ async function fetchSensorData() {
         console.error("❌ Failed to fetch sensor data from backend:", error);
     }
 }
+
 
 
 // Update chart with new data

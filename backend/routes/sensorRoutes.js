@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { fetchSensorData, getAllSensorData, getAllLogs, clearNotifications, getAllNotifications, updateSystemStatus } = require('../controllers/sensorController');
+const { fetchSensorData, getAllSensorData, getSystemStatus, getAllLogs, clearNotifications, getAllNotifications, updateSystemStatus } = require('../controllers/sensorController');
 
 // Route to fetch real-time sensor data
 router.get('/fetch', fetchSensorData);
@@ -11,7 +11,7 @@ router.get('/data', getAllSensorData);
 // Route to fetch logs
 router.get('/logs', getAllLogs);
 
-// router.get('/get-system-status', getSystemStatus); // ✅ Route for backend to fetch system status
+router.get('/get-system-status', getSystemStatus); // ✅ Route for backend to fetch system status
 
 
 // Route to clear notifications
