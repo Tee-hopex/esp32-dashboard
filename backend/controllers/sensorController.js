@@ -83,11 +83,11 @@ exports.fetchSensorData = async () => {
     }
 };
 
-// ✅ Schedule fetchSensorData to run every 10 seconds
-setInterval(() => {
-    console.log("⏳ Fetching sensor data...");
-    exports.fetchSensorData();
-}, 10000);
+// // ✅ Schedule fetchSensorData to run every 10 seconds
+// setInterval(() => {
+//     console.log("⏳ Fetching sensor data...");
+//     exports.fetchSensorData();
+// }, 10000);
 
 // ✅ Function to delete old notifications older than 24 hours
 const clearOldNotifications = async () => {
