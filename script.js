@@ -2,7 +2,7 @@ const API_BASE_URL = "https://esp-32-project-backend.vercel.app/api/sensors"; //
 //localhost: https://localhost:5000/api/sensors
 
 
-// let BLYNK_STATUS_URL = "https://blynk.cloud/external/api/get?token=7L6qI3gaecxIK6wMAvNytsvvLya9NyG8&V0"; // Blynk API for system status
+let BLYNK_STATUS_URL = ""; // Blynk API for system status
 
 let tempHumidityChart;
 let recentActivity = []; 
@@ -103,9 +103,9 @@ function showPage(pageId) {
 
 
 // ✅ Toggle Fetching Based on Switch
-document.getElementById("fetchToggle").addEventListener("change", function () {
+document.getElementById("fetchToggle").addEventListener("change", async function () {
     if (this.checked) {
-        // BLYNK_STATUS_URL = "https://blynk.cloud/external/api/get?token=7L6qI3gaecxIK6wMAvNytsvvLya9NyG8&V0"; // ✅ Enable fetching
+        BLYNK_STATUS_URL = "https://blynk.cloud/external/api/get?token=7L6qI3gaecxIK6wMAvNytsvvLya9NyG8&V0"; // ✅ Enable fetching
         document.getElementById("toggleText").textContent = "Fetching: ON";
         console.log("✅ Fetching Enabled.");
     } else {
@@ -113,18 +113,33 @@ document.getElementById("fetchToggle").addEventListener("change", function () {
         document.getElementById("toggleText").textContent = "Fetching: OFF";
         console.warn("🚫 Fetching Disabled.");
 
-        // ✅ Manually update system status indicator to "Offline"
+        // ✅ Update frontend status indicator to Offline
         const statusElement = document.getElementById("systemStatus");
         statusElement.innerHTML = "🔴 Offline";
         statusElement.style.color = "red";
         console.warn("🔴 System status set to Offline because fetching is disabled.");
+
+        // ✅ Send "offline" status to backend
+        try {
+            const response = await fetch(`${API_BASE_URL}/update-status`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ status: "offline" }) // ✅ Force backend to update status
+            });
+
+            const backendData = await response.json();
+            console.log("✅ Backend system status updated to Offline:", backendData);
+        } catch (error) {
+            console.error("❌ Failed to send offline status to backend:", error);
+        }
     }
 });
 
 
+
 // Fetch system status from Blynk API
 async function fetchSystemStatus() {
-    if (!BLYNK_STATUS_URL) {
+    if (BLYNK_STATUS_URL === "null") {
         console.warn("⚠ BLYNK_STATUS_URL is not set.");
         return;
     }
