@@ -401,7 +401,7 @@ function saveProfile() {
 window.onload = function() {
     initializeChart();
     setInterval(fetchSensorData, 10000);
-    setInterval(fetchSystemStatus, 3000); // Fetch system status every 3 seconds
+    setInterval(fetchSystemStatus, 3000); // Fetch system status every .3 seconds
     fetchSensorData();
     fetchSystemStatus();
 };
