@@ -2,7 +2,7 @@ const API_BASE_URL = "https://esp-32-project-backend.vercel.app/api/sensors"; //
 //localhost: https://localhost:5000/api/sensors
 
 
-// const BLYNK_STATUS_URL = "https://blynk.cloud/external/api/get?token=7L6qI3gaecxIK6wMAvNytsvvLya9NyG8&V0"; // Blynk API for system status
+const BLYNK_STATUS_URL = "https://blynk.cloud/external/api/get?token=7L6qI3gaecxIK6wMAvNytsvvLya9NyG8&V0"; // Blynk API for system status
 
 let tempHumidityChart;
 let recentActivity = []; 
@@ -98,6 +98,22 @@ function showPage(pageId) {
     pages.forEach(page => page.style.display = 'none');
     document.getElementById(pageId).style.display = 'block';
 }
+
+
+
+
+// ✅ Toggle Fetching Based on Switch
+document.getElementById("fetchToggle").addEventListener("change", function () {
+    if (this.checked) {
+        BLYNK_STATUS_URL = "https://blynk.cloud/external/api/get?token=7L6qI3gaecxIK6wMAvNytsvvLya9NyG8&V0"; // ✅ Set correct URL when enabled
+        document.getElementById("toggleText").textContent = "Fetching: ON";
+        console.log("✅ Fetching Enabled.");
+    } else {
+        BLYNK_STATUS_URL = ""; // ✅ Disable fetching by setting an empty string
+        document.getElementById("toggleText").textContent = "Fetching: OFF";
+        console.warn("🚫 Fetching Disabled.");
+    }
+});
 
 // Fetch system status from Blynk API
 async function fetchSystemStatus() {
