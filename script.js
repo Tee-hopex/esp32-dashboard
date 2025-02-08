@@ -1,4 +1,4 @@
-const API_BASE_URL = "https://esp-32-project-backend.vercel.app/api/sensors"; // Backend API base URL https://esp-32-project-backend.vercel.app/api/sensors 
+// const API_BASE_URL = "https://esp-32-project-backend.vercel.app/api/sensors"; // Backend API base URL https://esp-32-project-backend.vercel.app/api/sensors 
 //localhost: https://localhost:5000/api/sensors
 
 
