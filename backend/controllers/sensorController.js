@@ -1,3 +1,4 @@
+const { io } = require('../index'); // Import WebSocket instance
 const axios = require('axios');
 const SensorData = require('../models/SensorData');
 const Log = require('../models/Log'); // Import Log model
@@ -9,6 +10,73 @@ const TEMP_THRESHOLD = { min: 5, max: 50 }; // Adjusted for DHT11 sensor
 const HUMIDITY_THRESHOLD = { min: 20, max: 90 }; // Adjusted for DHT11 sensor
 
 let systemOnline = false; // Default status is offline
+
+exports.fetchSensorData = async () => {
+    try {
+        if (!systemOnline) {
+            console.log("🚫 System is offline. Skipping data fetch.");
+            return;
+        }
+
+        console.log("✅ Fetching sensor data...");
+
+        const tempUrl = `${BLYNK_API_URL}/get?token=${BLYNK_TOKEN}&V3`;
+        const humUrl = `${BLYNK_API_URL}/get?token=${BLYNK_TOKEN}&V1`;
+
+        let temperature, humidity;
+
+        try {
+            const tempResponse = await axios.get(tempUrl);
+            temperature = parseFloat(tempResponse.data);
+
+            const humResponse = await axios.get(humUrl);
+            humidity = parseFloat(humResponse.data);
+
+            if (isNaN(temperature) || isNaN(humidity)) {
+                throw new Error(`❌ Invalid sensor data received. Temp: ${temperature}, Humidity: ${humidity}`);
+            }
+
+        } catch (error) {
+            console.error(`❌ Failed to fetch sensor data: ${error.message}`);
+            await Log.create({ alert: "Failed to fetch sensor data", timestamp: new Date() }); // ✅ Log the error
+            return;
+        }
+
+        console.log(`🌡 Temp: ${temperature}°C, 💧 Humidity: ${humidity}%`);
+
+        // ✅ Save sensor readings to MongoDB
+        const newEntry = new SensorData({ temperature, humidity });
+        await newEntry.save();
+
+        console.log("✅ Sensor data stored successfully");
+
+        let alert = "";
+
+        // ✅ Check for out-of-range alerts
+        if (temperature < TEMP_THRESHOLD.min || temperature > TEMP_THRESHOLD.max) {
+            alert = `⚠ Temperature Alert: ${temperature}°C (out of range!)`;
+        }
+        if (humidity < HUMIDITY_THRESHOLD.min || humidity > HUMIDITY_THRESHOLD.max) {
+            alert += `\n⚠ Humidity Alert: ${humidity}% (out of range!)`;
+        }
+
+        if (alert) {
+            await Log.create({ temperature, humidity, alert, timestamp: new Date() });
+            await Notification.create({ message: alert });
+
+            console.log("🚨 Alert triggered:", alert);
+        }
+
+        // ✅ Emit data to frontend (for WebSockets)
+        io.emit("sensorData", { temperature, humidity });
+
+    } catch (error) {
+        console.error("❌ Error in fetchSensorData:", error.message);
+        await Log.create({ alert: "General Error in Sensor Fetching", timestamp: new Date() }); // ✅ Log the general error
+    }
+};
+
+
 
 // Function to update system status from frontend (script.js)
 exports.updateSystemStatus = async (req, res) => {
@@ -60,22 +128,23 @@ exports.fetchSensorData = async () => {
         await newEntry.save();
         console.log("✅ Sensor data stored:", { temperature, humidity });
 
-        let alert = "";
 
-        // Check for out-of-range alerts
-        if (temperature < TEMP_THRESHOLD.min || temperature > TEMP_THRESHOLD.max) {
-            alert = `⚠ Temperature Alert: ${temperature}°C (out of range!)\n`;
-        }
-        if (humidity < HUMIDITY_THRESHOLD.min || humidity > HUMIDITY_THRESHOLD.max) {
-            alert += `\n⚠ Humidity Alert: ${humidity}% (out of range!)`;
-        }
+        // let alert = "";
 
-        if (alert) {
-            await Log.create({ temperature, humidity, alert });
-            await Notification.create({ message: alert });
+        // // Check for out-of-range alerts
+        // if (temperature < TEMP_THRESHOLD.min || temperature > TEMP_THRESHOLD.max) {
+        //     alert = `⚠ Temperature Alert: ${temperature}°C (out of range!)\n`;
+        // }
+        // if (humidity < HUMIDITY_THRESHOLD.min || humidity > HUMIDITY_THRESHOLD.max) {
+        //     alert += `\n⚠ Humidity Alert: ${humidity}% (out of range!)`;
+        // }
 
-            console.log("🚨 Alert triggered:", alert);
-        }
+        // if (alert) {
+        //     await Log.create({ temperature, humidity, alert });
+        //     await Notification.create({ message: alert });
+
+        //     console.log("🚨 Alert triggered:", alert);
+        // }
 
     } catch (error) {
         console.error("❌ Failed to fetch sensor data:", error.message);
@@ -119,6 +188,7 @@ exports.getAllSensorData = async (req, res) => {
         res.status(500).json({ error: "❌ Failed to fetch stored data", details: error.message });
     }
 };
+
 
 // Get all logs
 exports.getAllLogs = async (req, res) => {

@@ -19,6 +19,32 @@ body {
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
 }
 
+/* Styled Download CSV Button */
+.download-btn {
+    display: inline-block;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: center;
+    transition: background 0.3s ease-in-out, transform 0.2s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.download-btn:hover {
+    background: linear-gradient(135deg, #5643a5, #3a2e84);
+    transform: scale(1.05);
+}
+
+.download-btn:active {
+    transform: scale(0.98);
+}
+
+
 /* Sidebar */
 .sidebar {
     width: 250px;
@@ -373,6 +399,28 @@ body {
     background: #c9302c;
 }
 
+/* Sidebar Toggle Button (Only for Mobile) */
+#menuToggle {
+    display: none; /* Hide by default */
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    background: #2c3e50;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    font-size: 24px;
+    border-radius: 5px;
+    cursor: pointer;
+    z-index: 1000; /* Ensure it's above other elements */
+    transition: background 0.3s ease-in-out;
+}
+
+#menuToggle:hover {
+    background: #1a252f;
+}
+
+
 
 /* Responsive Styles */
 @media screen and (max-width: 768px) {
@@ -381,9 +429,23 @@ body {
         margin: 10px;
     }
 
+    #menuToggle {
+        display: block; /* Show only on mobile */
+    }
+
     .sidebar {
-        width: 90%;
-        border-radius: 0;
+        position: fixed;
+        left: -250px; /* Hide sidebar initially */
+        top: 0;
+        height: 100%;
+        width: 250px;
+        transition: left 0.3s ease-in-out;
+        background: rgba(44, 62, 80, 0.95);
+        z-index: 999;
+    }
+
+    .sidebar.active {
+        left: 0;
     }
 
     .main-content {
@@ -498,3 +560,6 @@ body {
     color: #667eea;
     text-decoration: none;
 }
+
+
+

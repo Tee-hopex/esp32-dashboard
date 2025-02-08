@@ -9,8 +9,9 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="script.js" defer></script>
 </head>
-<body>
+<body>   
     <div class="dashboard-container">
+        <button id="menuToggle" onclick="toggleSidebar()">☰</button>
         <aside class="sidebar">
             <h2>Dashboard</h2>
             <ul>
@@ -93,7 +94,23 @@
                             <p>Time Range: <span id="statTimeRange">Waiting for data...</span></p>
                         </div>
                     </div>
+                    <div class="widget">
+                        <h3>System Logs</h3>
+                        <ul id="logList">
+                            <li>Loading logs...</li>
+                        </ul>
+                    </div>                  
                 </div>
+                <br>                   
+                <button class="download-btn" onclick="downloadCSV()">
+                    <img src="https://cdn-icons-png.flaticon.com/512/126/126510.png" width="16" height="16" alt="Download">
+                    Download CSV
+                </button>
+                <script>
+                    function downloadCSV() {
+                        window.location.href = "https://esp-32-project-backend.vercel.app/api/sensors/export-csv";
+                    }
+                </script>
             </div>
 
             <!-- Profile Page -->
