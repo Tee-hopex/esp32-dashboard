@@ -1,4 +1,4 @@
-const API_BASE_URL = "https://esp-32-project-backend.vercel.app/api"; // Backend API base URL
+const API_BASE_URL = "https://esp-32-project-backend.vercel.app/api/sensors"; // Backend API base URL
 // const BLYNK_STATUS_URL = "https://blynk.cloud/external/api/get?token=7L6qI3gaecxIK6wMAvNytsvvLya9NyG8&V0"; // Blynk API for system status
 
 let tempHumidityChart;
@@ -9,51 +9,6 @@ let stats = {
     avgHumidity: 0,
     totalReadings: 0
 };
-
-
-const socket = io("https://esp-32-project-backend.vercel.app"); 
-
-socket.on("sensorData", (data) => {
-    document.getElementById("tempValue").textContent = data.temperature + "°C";
-    document.getElementById("humidityValue").textContent = data.humidity + "%";
-    
-    updateChart(data.temperature, data.humidity);
-    updateRecentActivity(data.temperature, data.humidity);
-    updateStats([data]); 
-});
-
-function toggleSidebar() {
-    const sidebar = document.querySelector(".sidebar");
-    if (!sidebar) {
-        console.error("❌ Sidebar element not found!");
-        return;
-    }
-    sidebar.classList.toggle("active");
-}
-
-
-document.getElementById("menuToggle").addEventListener("click", function () {
-    console.log("☰ Menu button clicked!"); // Debugging log
-    document.querySelector(".sidebar").classList.toggle("active");
-});
-
-document.addEventListener("DOMContentLoaded", function () {
-    const toggleButton = document.getElementById("menuToggle");
-    const sidebar = document.querySelector(".sidebar");
-
-    if (toggleButton && sidebar) {
-        toggleButton.addEventListener("click", function () {
-            sidebar.classList.toggle("active");
-            console.log("☰ Sidebar toggled!"); // Debugging log
-        });
-    } else {
-        console.error("❌ Sidebar or toggle button not found!");
-    }
-});
-
-
-
-
 
 function logout() {
     localStorage.removeItem("authToken"); // Remove stored token
@@ -129,104 +84,62 @@ function showPage(pageId) {
 // Fetch system status from Blynk API
 async function fetchSystemStatus() {
     try {
-        console.log("🔄 Fetching system status...");
+        const response = await fetch(BLYNK_STATUS_URL);
+        const status = await response.text(); // Read response as plain text
 
-        const response = await fetch(`${API_BASE_URL}/sensors/system-status`);
-        if (!response.ok) throw new Error(`❌ Server responded with ${response.status}`);
-
-        const status = await response.json();
-        console.log("✅ System status received:", status);
-
+        const systemStatus = status.trim().toLowerCase();
         const statusElement = document.getElementById("systemStatus");
-        if (status.systemOnline) {
+
+        if (systemStatus === "online") {
             statusElement.innerHTML = "🟢 Online";
             statusElement.style.color = "green";
         } else {
             statusElement.innerHTML = "🔴 Offline";
             statusElement.style.color = "red";
         }
+
+        // Send system status to backend
+        await fetch("https://esp-32-project-backend.vercel.app/api/sensors/update-status", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ status: systemStatus })
+        });
+
     } catch (error) {
         console.error("❌ Failed to fetch system status:", error);
-        document.getElementById("systemStatus").innerHTML = "⚠ Error fetching status";
+        document.getElementById("systemStatus").innerHTML = "⚠ Error";
         document.getElementById("systemStatus").style.color = "orange";
     }
 }
-
-document.addEventListener("DOMContentLoaded", function () {
-    document.querySelectorAll(".dropdown-toggle").forEach(button => {
-        button.addEventListener("click", function () {
-            const dropdown = this.nextElementSibling;
-            dropdown.classList.toggle("active");
-            console.log("🔽 Dropdown toggled:", dropdown);
-        });
-    });
-});
-
-
-async function fetchLogs() {
-    try {
-        const response = await fetch(`${API_BASE_URL}/sensors/logs`);
-        if (!response.ok) throw new Error(`Server responded with status ${response.status}`);
-
-        const logs = await response.json();
-        const logList = document.getElementById("logList");
-
-        logList.innerHTML = logs.map(log => `<li>${log.timestamp}: ${log.alert}</li>`).join("");
-
-    } catch (error) {
-        console.error("❌ Failed to fetch logs:", error);
-    }
-}
-
-// 🔥 Call `fetchLogs` whenever new sensor data arrives
-socket.on("sensorData", () => {
-    fetchLogs();
-});
-
-
 
 
 // Fetch sensor data from backend every 3 seconds
 async function fetchSensorData() {
     try {
-        const response = await fetch(`${API_BASE_URL}/sensors/data`);
+        const response = await fetch("https://esp-32-project-backend.vercel.app/api/sensors/data");
         if (!response.ok) {
             throw new Error(`Server responded with status ${response.status}`);
         }
         const data = await response.json();
-        console.log("📊 Sensor Data Received:", data);
 
         if (data.length > 0) {
-            const latest = data[0]; // Get the most recent data
+            const latest = data[0];
 
-            document.getElementById("tempValue").textContent = latest.temperature + "°C";
-            document.getElementById("humidityValue").textContent = latest.humidity + "%";
+            document.getElementById("tempValue").textContent = latest.temperature;
+            document.getElementById("humidityValue").textContent = latest.humidity;
 
             updateChart(latest.temperature, latest.humidity);
             updateRecentActivity(latest.temperature, latest.humidity);
             updateStats(data);
         }
     } catch (error) {
-        console.error("❌ Failed to fetch sensor data:", error);
+        console.error("❌ Failed to fetch sensor data from backend:", error);
     }
 }
 
 
-// Fetch new sensor data every 5 seconds
-setInterval(fetchSensorData, 5000);
-fetchSensorData();
-
-
-
 // Update chart with new data
 function updateChart(temp, humidity) {
-    console.log("Updating chart with data:", temp, humidity); // Debugging log
-
-    if (!tempHumidityChart) {
-        console.error("❌ Chart not initialized!");
-        return;
-    }
-
     const now = new Date();
     const timeLabel = now.getHours() + ":" + (now.getMinutes() < 10 ? '0' : '') + now.getMinutes();
     
@@ -242,10 +155,9 @@ function updateChart(temp, humidity) {
         tempHumidityChart.data.datasets[0].data.shift();
         tempHumidityChart.data.datasets[1].data.shift();
     }
-
+    
     tempHumidityChart.update();
 }
-
 
 // Update recent activity list
 let tempSum = 0;
@@ -325,13 +237,7 @@ let firstReadingTime = null; // Track the first reading time
 let lastReadingTime = null; // Track the last recorded time
 
 function updateStats(data) {
-    if (data.length === 0) {
-        console.warn("⚠ No sensor data available!");
-        return;
-    }
-
-    console.log("📊 Sensor Data Received for Statistics:", data);
-  
+    if (data.length === 0) return; // Prevent calculations if no data is available
 
     const total = data.length;
     const avgTemp = data.reduce((sum, entry) => sum + entry.temperature, 0) / total;
@@ -361,23 +267,10 @@ function updateStats(data) {
 }
 
 
-// Initialize chart with gradient fill
+// Initialize chart
 function initializeChart() {
-    const ctx = document.getElementById('tempHumidityChart');
-    
-    if (!ctx) {
-        console.error("❌ Chart canvas element not found!");
-        return;
-    }
-
-    const chartContext = ctx.getContext('2d');
-
-    // Create gradient effect
-    const gradient = chartContext.createLinearGradient(0, 0, 0, 400);
-    gradient.addColorStop(0, 'rgba(66, 135, 245, 0.6)');
-    gradient.addColorStop(1, 'rgba(255, 255, 255, 0.1)');
-
-    tempHumidityChart = new Chart(chartContext, {
+    const ctx = document.getElementById('tempHumidityChart').getContext('2d');
+    tempHumidityChart = new Chart(ctx, {
         type: 'line',
         data: {
             labels: [],
@@ -385,48 +278,29 @@ function initializeChart() {
                 {
                     label: 'Temperature (°C)',
                     data: [],
-                    borderColor: '#f44336', // Red line for temperature
-                    backgroundColor: gradient,
+                    borderColor: '#667eea',
                     borderWidth: 2,
-                    fill: true,
-                    tension: 0.4
+                    fill: false
                 },
                 {
                     label: 'Humidity (%)',
                     data: [],
-                    borderColor: '#3f51b5', // Blue line for humidity
-                    backgroundColor: 'rgba(63, 81, 181, 0.3)',
+                    borderColor: '#764ba2',
                     borderWidth: 2,
-                    fill: true,
-                    tension: 0.4
+                    fill: false
                 }
             ]
         },
         options: {
+            animation: {
+                duration: 1000,
+                easing: 'easeInOutQuart'
+            },
             responsive: true,
             maintainAspectRatio: false,
-            scales: {
-                x: {
-                    ticks: { color: '#666' }
-                },
-                y: {
-                    ticks: { color: '#666' },
-                    beginAtZero: true
-                }
-            }
         }
     });
-
-    console.log("✅ Chart initialized successfully!");
 }
-
-
-    // **Force an immediate update after rendering**
-    setTimeout(() => {
-        tempHumidityChart.update();
-    }, 500);
-}
-
 
 // Toggle notifications dropdown
 function toggleNotifications() {
@@ -445,21 +319,6 @@ function enableEdit() {
     });
     document.getElementById('saveProfileBtn').style.display = 'inline-block';
 }
-
-document.addEventListener("DOMContentLoaded", function () {
-    const profileDropdown = document.getElementById("profileDropdown");
-    const profileButton = document.getElementById("profileButton");
-
-    if (profileButton && profileDropdown) {
-        profileButton.addEventListener("click", function () {
-            profileDropdown.classList.toggle("active");
-            console.log("👤 Profile dropdown toggled!");
-        });
-    } else {
-        console.error("❌ Profile button or dropdown not found!");
-    }
-});
-
 
 function saveProfile() {
     document.querySelectorAll('.editable').forEach(input => {
