@@ -105,15 +105,22 @@ function showPage(pageId) {
 // ✅ Toggle Fetching Based on Switch
 document.getElementById("fetchToggle").addEventListener("change", function () {
     if (this.checked) {
-        BLYNK_STATUS_URL = "https://blynk.cloud/external/api/get?token=7L6qI3gaecxIK6wMAvNytsvvLya9NyG8&V0"; // ✅ Set correct URL when enabled
+        BLYNK_STATUS_URL = "https://blynk.cloud/external/api/get?token=7L6qI3gaecxIK6wMAvNytsvvLya9NyG8&V0"; // ✅ Enable fetching
         document.getElementById("toggleText").textContent = "Fetching: ON";
         console.log("✅ Fetching Enabled.");
     } else {
-        BLYNK_STATUS_URL = ""; // ✅ Disable fetching by setting an empty string
+        BLYNK_STATUS_URL = ""; // ✅ Disable fetching
         document.getElementById("toggleText").textContent = "Fetching: OFF";
         console.warn("🚫 Fetching Disabled.");
+
+        // ✅ Manually update system status indicator to "Offline"
+        const statusElement = document.getElementById("systemStatus");
+        statusElement.innerHTML = "🔴 Offline";
+        statusElement.style.color = "red";
+        console.warn("🔴 System status set to Offline because fetching is disabled.");
     }
 });
+
 
 // Fetch system status from Blynk API
 async function fetchSystemStatus() {
