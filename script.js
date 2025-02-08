@@ -1,5 +1,5 @@
 const API_BASE_URL = "https://esp-32-project-backend.vercel.app/api"; // Backend API base URL
-const BLYNK_STATUS_URL = "https://blynk.cloud/external/api/get?token=7L6qI3gaecxIK6wMAvNytsvvLya9NyG8&V0"; // Blynk API for system status
+// const BLYNK_STATUS_URL = "https://blynk.cloud/external/api/get?token=7L6qI3gaecxIK6wMAvNytsvvLya9NyG8&V0"; // Blynk API for system status
 
 let tempHumidityChart;
 let recentActivity = [];
@@ -39,10 +39,15 @@ document.getElementById("menuToggle").addEventListener("click", function () {
 
 document.addEventListener("DOMContentLoaded", function () {
     const toggleButton = document.getElementById("menuToggle");
-    if (toggleButton) {
-        toggleButton.addEventListener("click", toggleSidebar);
+    const sidebar = document.querySelector(".sidebar");
+
+    if (toggleButton && sidebar) {
+        toggleButton.addEventListener("click", function () {
+            sidebar.classList.toggle("active");
+            console.log("☰ Sidebar toggled!"); // Debugging log
+        });
     } else {
-        console.error("❌ Toggle button not found!");
+        console.error("❌ Sidebar or toggle button not found!");
     }
 });
 
@@ -124,11 +129,15 @@ function showPage(pageId) {
 // Fetch system status from Blynk API
 async function fetchSystemStatus() {
     try {
+        console.log("🔄 Fetching system status...");
+
         const response = await fetch(`${API_BASE_URL}/sensors/system-status`);
+        if (!response.ok) throw new Error(`❌ Server responded with ${response.status}`);
+
         const status = await response.json();
+        console.log("✅ System status received:", status);
 
         const statusElement = document.getElementById("systemStatus");
-
         if (status.systemOnline) {
             statusElement.innerHTML = "🟢 Online";
             statusElement.style.color = "green";
@@ -138,10 +147,20 @@ async function fetchSystemStatus() {
         }
     } catch (error) {
         console.error("❌ Failed to fetch system status:", error);
-        document.getElementById("systemStatus").innerHTML = "⚠ Error";
+        document.getElementById("systemStatus").innerHTML = "⚠ Error fetching status";
         document.getElementById("systemStatus").style.color = "orange";
     }
 }
+
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".dropdown-toggle").forEach(button => {
+        button.addEventListener("click", function () {
+            const dropdown = this.nextElementSibling;
+            dropdown.classList.toggle("active");
+            console.log("🔽 Dropdown toggled:", dropdown);
+        });
+    });
+});
 
 
 async function fetchLogs() {
@@ -426,6 +445,21 @@ function enableEdit() {
     });
     document.getElementById('saveProfileBtn').style.display = 'inline-block';
 }
+
+document.addEventListener("DOMContentLoaded", function () {
+    const profileDropdown = document.getElementById("profileDropdown");
+    const profileButton = document.getElementById("profileButton");
+
+    if (profileButton && profileDropdown) {
+        profileButton.addEventListener("click", function () {
+            profileDropdown.classList.toggle("active");
+            console.log("👤 Profile dropdown toggled!");
+        });
+    } else {
+        console.error("❌ Profile button or dropdown not found!");
+    }
+});
+
 
 function saveProfile() {
     document.querySelectorAll('.editable').forEach(input => {
