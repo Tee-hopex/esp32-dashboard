@@ -11,6 +11,9 @@ router.get('/data', getAllSensorData);
 // Route to fetch logs
 router.get('/logs', getAllLogs);
 
+// router.get('/get-system-status', getSystemStatus); // ✅ Route for backend to fetch system status
+
+
 // Route to clear notifications
 router.delete('/clear-notifications', clearNotifications);
 

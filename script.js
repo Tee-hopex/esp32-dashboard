@@ -1,8 +1,11 @@
-const API_BASE_URL = "https://esp-32-project-backend.vercel.app/api/sensors"; // Backend API base URL
+const API_BASE_URL = "https://esp-32-project-backend.vercel.app/api/sensors"; // Backend API base URL https://esp-32-project-backend.vercel.app/api/sensors 
+//localhost: https://localhost:5000/api/sensors
+
+
 // const BLYNK_STATUS_URL = "https://blynk.cloud/external/api/get?token=7L6qI3gaecxIK6wMAvNytsvvLya9NyG8&V0"; // Blynk API for system status
 
 let tempHumidityChart;
-let recentActivity = [];
+let recentActivity = []; 
 let notifications = [];
 let stats = {
     avgTemp: 0,
@@ -15,9 +18,16 @@ function logout() {
     window.location.href = "index.html"; // Redirect to login page
 }
 
+document.addEventListener("visibilitychange", function() {
+    if (!document.hidden) {
+        fetchNotifications();
+    }
+});
+
+
 async function fetchNotifications() {
     try {
-        const response = await fetch("https://esp-32-project-backend.vercel.app/api/sensors/notifications");
+        const response = await fetch(`${API_BASE_URL}/notifications`);
         if (!response.ok) {
             throw new Error(`Server responded with status ${response.status}`);
         }
@@ -41,7 +51,7 @@ async function fetchNotifications() {
 
 async function clearNotifications() {
     try {
-        const response = await fetch("https://esp-32-project-backend.vercel.app/api/sensors/clear-notifications", { method: "DELETE" });
+        const response = await fetch(`${API_BASE_URL}/clear-notifications`, { method: "DELETE" });
         if (!response.ok) {
             throw new Error(`Server responded with status ${response.status}`);
         }
@@ -55,6 +65,14 @@ async function clearNotifications() {
         console.error("❌ Failed to clear notifications:", error);
     }
 }
+
+document.addEventListener("click", function (event) {
+    let dropdown = document.querySelector(".notification-dropdown");
+    if (!dropdown.contains(event.target) && !event.target.classList.contains("notification-icon")) {
+        dropdown.classList.remove("active");
+    }
+});
+
 
 
 // Helper function to format timestamps
@@ -83,11 +101,20 @@ function showPage(pageId) {
 
 // Fetch system status from Blynk API
 async function fetchSystemStatus() {
+    if (!BLYNK_STATUS_URL) {
+        console.warn("⚠ BLYNK_STATUS_URL is not set.");
+        return;
+    }
+
     try {
+        console.log("🌍 Fetching system status from Blynk API...");
+
         const response = await fetch(BLYNK_STATUS_URL);
-        const status = await response.text(); // Read response as plain text
+        const status = await response.text();
 
         const systemStatus = status.trim().toLowerCase();
+        console.log(`✅ System status received from Blynk: ${systemStatus}`);
+
         const statusElement = document.getElementById("systemStatus");
 
         if (systemStatus === "online") {
@@ -98,25 +125,31 @@ async function fetchSystemStatus() {
             statusElement.style.color = "red";
         }
 
-        // Send system status to backend
-        await fetch("https://esp-32-project-backend.vercel.app/api/sensors/update-status", {
+        console.log(`🔄 Sending system status to backend: ${systemStatus}`);
+
+        const backendResponse = await fetch(`${API_BASE_URL}/update-status`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ status: systemStatus })
         });
 
+        const backendData = await backendResponse.json();
+        console.log("✅ System status updated on backend:", backendData);
+
     } catch (error) {
-        console.error("❌ Failed to fetch system status:", error);
+        console.error("❌ Failed to fetch or send system status:", error);
         document.getElementById("systemStatus").innerHTML = "⚠ Error";
         document.getElementById("systemStatus").style.color = "orange";
     }
 }
 
 
+
+
 // Fetch sensor data from backend every 3 seconds
 async function fetchSensorData() {
     try {
-        const response = await fetch("https://esp-32-project-backend.vercel.app/api/sensors/data");
+        const response = await fetch(`${API_BASE_URL}/data`);
         if (!response.ok) {
             throw new Error(`Server responded with status ${response.status}`);
         }
@@ -333,8 +366,8 @@ function saveProfile() {
 // Run auto-fetch every 3 seconds
 window.onload = function() {
     initializeChart();
-    setInterval(fetchSensorData, 3000);
-    setInterval(fetchSystemStatus, 3000); // Fetch system status every 3 seconds
+    setInterval(fetchSensorData, 10000);
+    setInterval(fetchSystemStatus, 30000); // Fetch system status every 3 seconds
     fetchSensorData();
     fetchSystemStatus();
 };

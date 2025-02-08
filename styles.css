@@ -45,7 +45,7 @@ body {
     text-align: center;
     background: rgba(52, 73, 94, 0.8);
     border-radius: 10px;
-    transition: background 0.3s ease;
+    transition: background 0.4s ease-in-out;
 }
 
 .sidebar ul li:hover {
@@ -240,6 +240,7 @@ body {
 
 .edit-button:hover, .save-button:hover {
     opacity: 0.9;
+    transform: scale(1.05);
 }
 
 .profile-content {
@@ -355,6 +356,12 @@ body {
     background: #f5f5f5;
 }
 
+.notification-list li.unread {
+    font-weight: bold;
+    background: #f8d7da;
+}
+
+
 /* Clear Button */
 .clear-btn {
     background: #d9534f;
@@ -371,6 +378,7 @@ body {
 
 .clear-btn:hover {
     background: #c9302c;
+    transform: scale(1.05);
 }
 
 
@@ -388,6 +396,11 @@ body {
 
     .main-content {
         margin: 10px;
+    }
+
+    .widget {
+        width: 90%;
+        margin: auto;
     }
 
     .widgets, .sensor-display {
