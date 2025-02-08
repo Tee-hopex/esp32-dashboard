@@ -105,8 +105,7 @@ function showPage(pageId) {
 // ✅ Toggle Fetching Based on Switch
 document.getElementById("fetchToggle").addEventListener("change", function () {
     if (this.checked) {
-        // BLYNK_STATUS_URL = "https://blynk.c
-        loud/external/api/get?token=7L6qI3gaecxIK6wMAvNytsvvLya9NyG8&V0"; // ✅ Set correct URL when enabled
+        BLYNK_STATUS_URL = "https://blynk.cloud/external/api/get?token=7L6qI3gaecxIK6wMAvNytsvvLya9NyG8&V0"; // ✅ Set correct URL when enabled
         document.getElementById("toggleText").textContent = "Fetching: ON";
         console.log("✅ Fetching Enabled.");
     } else {
