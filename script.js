@@ -11,7 +11,107 @@ let stats = {
     avgTemp: 0,
     avgHumidity: 0,
     totalReadings: 0
-};
+}
+
+
+
+async function fetchLast10MinutesSensorData() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/sensor-data-last-10-minutes`);
+        if (!response.ok) {
+            throw new Error(`Server responded with status ${response.status}`);
+        }
+
+        const sensorData = await response.json();
+
+        if (sensorData.length === 0) {
+            document.getElementById("avgTemp").textContent = "N/A";
+            document.getElementById("avgHumidity").textContent = "N/A";
+            document.getElementById("totalReadings").textContent = "0";
+            return;
+        }
+
+        const total = sensorData.length;
+        const avgTemp = sensorData.reduce((sum, entry) => sum + entry.temperature, 0) / total;
+        const avgHumidity = sensorData.reduce((sum, entry) => sum + entry.humidity, 0) / total;
+
+        // ✅ Update statistics section in the dashboard
+        document.getElementById("avgTemp").textContent = avgTemp.toFixed(1);
+        document.getElementById("avgHumidity").textContent = avgHumidity.toFixed(1);
+        document.getElementById("totalReadings").textContent = total;
+
+    } catch (error) {
+        console.error("❌ Failed to fetch last 10 minutes sensor data:", error);
+    }
+}
+
+// ✅ Fetch data every 30 seconds
+setInterval(fetchLast10MinutesSensorData, 30000);
+fetchLast10MinutesSensorData();
+
+
+
+
+// async function fetchRecentLogs() {
+//     try {
+//         const response = await fetch(`${API_BASE_URL}/recent-logs`);
+//         if (!response.ok) {
+//             throw new Error(`Server responded with status ${response.status}`);
+//         }
+
+//         const logs = await response.json();
+//         const activityList = document.getElementById("recentActivityList");
+
+//         if (logs.length === 0) {
+//             activityList.innerHTML = "<li>No recent activity</li>";
+//         } else {
+//             activityList.innerHTML = logs.map(log => `
+//                 <li>
+//                     <strong>${formatTime(log.timestamp)}</strong> - 
+//                     Temp: ${log.temperature}°C, Humidity: ${log.humidity}%
+//                     ${log.alert ? `<br><span style="color:red;">${log.alert}</span>` : ""}
+//                 </li>
+//             `).join('');
+//         }
+//     } catch (error) {
+//         console.error("❌ Failed to fetch recent logs:", error);
+//     }
+// }
+
+// // ✅ Fetch logs every 5 seconds
+// setInterval(fetchRecentLogs, 5000);
+// fetchRecentLogs();
+
+
+async function fetchRecentSensorData() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/recent-sensor-data`);
+        if (!response.ok) {
+            throw new Error(`Server responded with status ${response.status}`);
+        }
+
+        const sensorData = await response.json();
+        const activityList = document.getElementById("recentActivityList");
+
+        if (sensorData.length === 0) {
+            activityList.innerHTML = "<li>No recent sensor data</li>";
+        } else {
+            activityList.innerHTML = sensorData.map(data => `
+                <li>
+                    <strong>${formatTime(data.timestamp)}</strong> - 
+                    Temp: ${data.temperature}°C, Humidity: ${data.humidity}%
+                </li>
+            `).join('');
+        }
+    } catch (error) {
+        console.error("❌ Failed to fetch recent sensor data:", error);
+    }
+}
+
+// ✅ Fetch recent sensor data every 5 seconds
+setInterval(fetchRecentSensorData, 5000);
+fetchRecentSensorData();
+
 
 function logout() {
     localStorage.removeItem("authToken"); // Remove stored token
